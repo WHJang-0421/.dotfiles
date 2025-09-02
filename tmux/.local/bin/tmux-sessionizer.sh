@@ -5,7 +5,7 @@ if [[ $# -eq 1 ]]; then
 else
     selected=$(find ~/ ~/edu/ ~/ps/ ~/side_projects/ ~/blog/ -mindepth 1 -maxdepth 1 -type d | \
         sed "s|^$HOME/||" | \
-        sk --margin 10% --color="bw" # if skim is not available, use fzf
+        fzf --margin 10% --color="bw" # if skim is not available, use fzf
     )
     # Add home path back
     if [[ -n "$selected" ]]; then
