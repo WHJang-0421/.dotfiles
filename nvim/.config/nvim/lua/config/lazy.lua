@@ -217,7 +217,24 @@ require("lazy").setup({
 			config = function()
 				local capabilities = require('blink.cmp').get_lsp_capabilities()
 				require("lspconfig").lua_ls.setup { capabilities = capabilities }
+				require("lspconfig").pyright.setup { capabilities = capabilities }
 			end
+		},
+		{
+			'stevearc/conform.nvim',
+			keys = {
+				{
+					'<leader>fc',
+					function()
+						require('conform').format { async = true, lsp_format = 'fallback' }
+					end,
+					mode = '',
+					desc = '[F]ormat [C]urrent buffer',
+				}
+			},
+			opts = {
+				formatters_by_ft = { python = { "black" }, },
+			},
 		},
 		{
 			'saghen/blink.cmp',
@@ -239,14 +256,10 @@ require("lazy").setup({
 			opts_extend = { "sources.default" }
 		},
 		{
-			"iamcco/markdown-preview.nvim",
-			cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
-			build = "cd app && npm install",
-			init = function()
-				vim.g.mkdp_filetypes = { "markdown" }
-			end,
-			ft = { "markdown" },
-		},
+			'MeanderingProgrammer/render-markdown.nvim',
+			dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' },
+			opts = {},
+		}
 	},
 	-- Configure any other settings here. See the documentation for more details.
 	-- colorscheme that will be used when installing plugins.

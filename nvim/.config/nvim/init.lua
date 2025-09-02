@@ -24,7 +24,6 @@ vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
 vim.keymap.set("n", "<leader>pv", "<cmd>Ex<CR>", { desc = "[P]roject [V]iew (open netrw)" })
 vim.keymap.set("n", "<leader>xc", "<cmd>RunCurrent<CR>", { desc = "E[x]ecute [c]urrent file" })
-vim.keymap.set("n", "<leader>fc", vim.lsp.buf.format, { desc = "[F]ormat [c]urrent file" })
 
 -- custom commands
 vim.api.nvim_create_user_command("SudoWrite", "w !sudo tee % >/dev/null", {})
