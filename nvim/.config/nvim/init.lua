@@ -5,6 +5,10 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 vim.g.have_nerd_font = true
 
+vim.opt.tabstop = 4
+vim.opt.smartindent = true
+vim.opt.shiftwidth = 4
+vim.opt.expandtab = true
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.breakindent = true
@@ -26,7 +30,10 @@ vim.keymap.set("n", "<leader>pv", "<cmd>Ex<CR>", { desc = "[P]roject [V]iew (ope
 vim.keymap.set("n", "<leader>xc", "<cmd>RunCurrent<CR>", { desc = "E[x]ecute [c]urrent file" })
 
 -- custom commands
-vim.api.nvim_create_user_command("SudoWrite", "w !sudo tee % >/dev/null", {})
+vim.api.nvim_create_user_command("SudoW", function()
+	vim.cmd("silent! w !pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY tee % >/dev/null") -- Save file using pkexec
+	vim.cmd("edit!") -- Force reload the file
+end, {})
 vim.api.nvim_create_user_command("RunCurrent", function()
 	local path2module = function(path)
 		local module = path:gsub("%.py$", "")
@@ -68,9 +75,8 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.diagnostic.config({
-  virtual_lines = true
+	virtual_lines = true,
 })
 
 -- now starts the whole plugin business
 require("config.lazy")
-

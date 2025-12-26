@@ -6,7 +6,7 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 	if vim.v.shell_error ~= 0 then
 		vim.api.nvim_echo({
 			{ "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-			{ out,                            "WarningMsg" },
+			{ out, "WarningMsg" },
 			{ "\nPress any key to exit..." },
 		}, true, {})
 		vim.fn.getchar()
@@ -19,7 +19,7 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
 	spec = {
 		"tpope/vim-fugitive",
-		{      -- useful plugin to show you pending keybinds.
+		{ -- useful plugin to show you pending keybinds.
 			"folke/which-key.nvim",
 			event = "vimenter", -- sets the loading event to 'vimenter'
 			opts = {
@@ -80,32 +80,59 @@ require("lazy").setup({
 			"mbbill/undotree",
 			config = function()
 				vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
-			end
+			end,
 		},
 		{
 			"nvim-telescope/telescope.nvim",
 			dependencies = {
 				"nvim-lua/plenary.nvim",
+				{
+					"nvim-telescope/telescope-fzf-native.nvim",
+					build = "cmake -s. -bbuild -dcmake_build_type=release && cmake --build build --config release",
+				},
 			},
 			config = function()
+				local vimgrep_arguments = {
+					"rg",
+					"--color=never",
+					"--no-heading",
+					"--with-filename",
+					"--line-number",
+					"--column",
+					"--smart-case",
+				}
+				table.insert(vimgrep_arguments, "--hidden")
+				table.insert(vimgrep_arguments, "--glob")
+				table.insert(vimgrep_arguments, "!**/.git/*")
+				table.insert(vimgrep_arguments, "-L") -- follow symbolic links
+
 				require("telescope").setup({
 					defaults = {
-						vimgrep_arguments = {
-							"rg",
-							"--color=never",
-							"--no-heading",
-							"--with-filename",
-							"--line-number",
-							"--column",
-							"--smart-case",
-							"--hidden", -- this is the only non-default part
+						vimgrep_arguments = vimgrep_arguments,
+						file_ignore_patterns = {
+							"%.git/",
+							"%.cache/",
+							"%.vscode/",
+							"%.a",
+							"%.o",
+							"%.out",
+							"%.class",
+							"%.pdf",
+							"%.zip",
+						},
+					},
+					extensions = {
+						fzf = {
+							fuzzy = true, -- false will only do exact matching
+							override_generic_sorter = true, -- override the generic sorter
+							override_file_sorter = true, -- override the file sorter
 						},
 					},
 				})
 				-- telescope settings & key bindings
 				local builtin = require("telescope.builtin")
 				vim.keymap.set("n", "<leader>fr", function()
-					builtin.find_files({ hidden = true, cwd = "/" })
+					builtin.find_files({ cwd = "/", hidden = true })
 				end, { desc = "telescope find files from root" })
 				vim.keymap.set("n", "<leader>ff", function()
 					builtin.find_files({ hidden = true })
@@ -114,10 +141,6 @@ require("lazy").setup({
 				vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "telescope buffers" })
 				vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "telescope help tags" })
 			end,
-		},
-		{
-			"nvim-telescope/telescope-fzf-native.nvim",
-			build = "cmake -s. -bbuild -dcmake_build_type=release && cmake --build build --config release",
 		},
 		{
 			"theprimeagen/harpoon",
@@ -146,6 +169,12 @@ require("lazy").setup({
 				end)
 				vim.keymap.set("n", "<M-4>", function()
 					harpoon:list():select(4)
+				end)
+				vim.keymap.set("n", "<M-5>", function()
+					harpoon:list():select(5)
+				end)
+				vim.keymap.set("n", "<M-6>", function()
+					harpoon:list():select(6)
 				end)
 			end,
 		},
@@ -191,12 +220,12 @@ require("lazy").setup({
 			name = "catppuccin",
 			priority = 1000,
 			config = function()
-				vim.cmd.colorscheme "catppuccin"
-			end
+				vim.cmd.colorscheme("catppuccin")
+			end,
 		},
 		{
 			"mason-org/mason.nvim",
-			opts = {}
+			opts = {},
 		},
 		{
 			"neovim/nvim-lspconfig",
@@ -215,51 +244,58 @@ require("lazy").setup({
 				},
 			},
 			config = function()
-				local capabilities = require('blink.cmp').get_lsp_capabilities()
-				require("lspconfig").lua_ls.setup { capabilities = capabilities }
-				require("lspconfig").pyright.setup { capabilities = capabilities }
-			end
+				local capabilities = require("blink.cmp").get_lsp_capabilities()
+				vim.lsp.config("lua_ls", {
+					capabilities = capabilities,
+				})
+				vim.lsp.config("pyright", {
+					capabilities = capabilities,
+				})
+				vim.lsp.config("clangd", {
+					capabilities = capabilities,
+				})
+			end,
 		},
 		{
-			'stevearc/conform.nvim',
+			"stevearc/conform.nvim",
 			keys = {
 				{
-					'<leader>fc',
+					"<leader>fc",
 					function()
-						require('conform').format { async = true, lsp_format = 'fallback' }
+						require("conform").format({ async = true, lsp_format = "fallback" })
 					end,
-					mode = '',
-					desc = '[F]ormat [C]urrent buffer',
-				}
+					mode = "",
+					desc = "[F]ormat [C]urrent buffer",
+				},
 			},
 			opts = {
-				formatters_by_ft = { python = { "black" }, },
+				formatters_by_ft = { python = { "black" }, c = { "clang-format" }, lua = { "stylua" } },
 			},
 		},
 		{
-			'saghen/blink.cmp',
-			dependencies = { 'rafamadriz/friendly-snippets' },
+			"saghen/blink.cmp",
+			dependencies = { "rafamadriz/friendly-snippets" },
 
-			version = '1.*',
+			version = "1.*",
 			opts = {
-				keymap = { preset = 'default' },
+				keymap = { preset = "default" },
 
 				appearance = {
-					nerd_font_variant = 'mono'
+					nerd_font_variant = "mono",
 				},
 
 				-- Default list of enabled providers
 				sources = {
-					default = { 'lsp', 'path', 'snippets', 'buffer' },
+					default = { "lsp", "path", "snippets", "buffer" },
 				},
 			},
-			opts_extend = { "sources.default" }
+			opts_extend = { "sources.default" },
 		},
 		{
-			'MeanderingProgrammer/render-markdown.nvim',
-			dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' },
+			"MeanderingProgrammer/render-markdown.nvim",
+			dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" },
 			opts = {},
-		}
+		},
 	},
 	-- Configure any other settings here. See the documentation for more details.
 	-- colorscheme that will be used when installing plugins.
