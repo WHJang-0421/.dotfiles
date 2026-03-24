@@ -18,27 +18,17 @@ vim.opt.rtp:prepend(lazypath)
 -- Setup lazy.nvim
 require("lazy").setup({
 	spec = {
-		"tpope/vim-fugitive",
-		{ -- useful plugin to show you pending keybinds.
+		{
 			"folke/which-key.nvim",
-			event = "vimenter", -- sets the loading event to 'vimenter'
-			opts = {
-				-- delay between pressing a key and opening which-key (milliseconds)
-				-- this setting is independent of vim.o.timeoutlen
-				delay = 0,
-				icons = {
-					-- set icon mappings to true if you have a nerd font
-					mappings = vim.g.have_nerd_font,
-					-- if you are using a nerd font: set icons.keys to an empty table which will use the
-					-- default which-key.nvim defined nerd font icons, otherwise define a string table
-					keys = {},
-				},
-
-				-- document existing key chains
-				spec = {
-					{ "<leader>f", group = "[f]ind" },
-					{ "<leader>g", group = "[g]oto" },
-					{ "<leader>x", group = "e[x]ecute" },
+			event = "VeryLazy",
+			opts = {},
+			keys = {
+				{
+					"<leader>?",
+					function()
+						require("which-key").show({ global = false })
+					end,
+					desc = "Buffer Local Keymaps (which-key)",
 				},
 			},
 		},
@@ -179,7 +169,8 @@ require("lazy").setup({
 			end,
 		},
 		{ -- collection of various small independent plugins/modules
-			"echasnovski/mini.nvim",
+			"nvim-mini/mini.nvim",
+			version = "*",
 			config = function()
 				-- better around/inside textobjects
 				--
@@ -211,8 +202,8 @@ require("lazy").setup({
 					return "%2l:%-2v"
 				end
 
-				-- ... and there is more!
-				--  check out: https://github.com/echasnovski/mini.nvim
+				-- icons
+				require("mini.icons").setup()
 			end,
 		},
 		{
@@ -254,6 +245,9 @@ require("lazy").setup({
 				vim.lsp.config("clangd", {
 					capabilities = capabilities,
 				})
+				vim.lsp.enable("lua_ls")
+				vim.lsp.enable("pyright")
+				vim.lsp.enable("clangd")
 			end,
 		},
 		{
@@ -269,7 +263,12 @@ require("lazy").setup({
 				},
 			},
 			opts = {
-				formatters_by_ft = { python = { "black" }, c = { "clang-format" }, lua = { "stylua" } },
+				formatters_by_ft = { python = { "black" }, c = { "clang_format" }, lua = { "stylua" } },
+				formatters = {
+					clang_format = {
+						prepend_args = { "--fallback-style=LLVM" },
+					},
+				},
 			},
 		},
 		{
@@ -290,11 +289,6 @@ require("lazy").setup({
 				},
 			},
 			opts_extend = { "sources.default" },
-		},
-		{
-			"MeanderingProgrammer/render-markdown.nvim",
-			dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" },
-			opts = {},
 		},
 	},
 	-- Configure any other settings here. See the documentation for more details.
