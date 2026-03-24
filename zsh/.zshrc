@@ -10,13 +10,8 @@ export PATH=$PATH:$ANDROID_HOME/platform-tools
 
 ### User configuration
 
-export EDITOR=nvim
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='nvim'
-# fi
+alias nv='nvim-linux-x86_64.appimage'
+export EDITOR=nv
 
 # Add fzf
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
@@ -39,6 +34,10 @@ unset __conda_setup
 gcc800() {
     gcc -Wall -Werror -pedantic -std=c99 "$@"
 }
+
+if [[ "$TERM" == "xterm-kitty" ]]; then
+    alias ssh="kitty +kitten ssh"
+fi
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
